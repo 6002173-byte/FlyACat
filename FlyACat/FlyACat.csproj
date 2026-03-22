@@ -74,10 +74,16 @@
 	  <Compile Update="LevelSelectPage.xaml.cs">
 	    <DependentUpon>LevelSelectPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="GamePage.xaml.cs">
+	    <DependentUpon>GamePage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <MauiXaml Update="LevelSelectPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="GamePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

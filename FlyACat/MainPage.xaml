@@ -21,7 +21,7 @@
         <Frame BorderColor="LightGray" CornerRadius="15" Padding="15" HasShadow="True">
             <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
 
-                <!-- 头像 -->
+                <!-- 头像  -->
                 <Image 
                     x:Name="UserAvatar"
                     Source="dotnet_bot.png" 
@@ -43,28 +43,28 @@
                     WidthRequest="200"
                     TextChanged="OnIdChanged"/>
 
-                <!--Button group: Take photo & Select picture -->
+                <!-- Button group: Take photo & Select picture  -->
                 <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
                     <Button 
                         Text="📷 Photo"
-                        Clicked="OnTakePhotoClicked"
                         FontSize="12"
                         Padding="10,5"
                         BackgroundColor="#2196F3"
                         TextColor="White"/>
+                
 
                     <Button 
                         Text="️ Gallery"
-                        Clicked="OnPickFromGalleryClicked"
                         FontSize="12"
                         Padding="10,5"
                         BackgroundColor="#4CAF50"
                         TextColor="White"/>
+               
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Frame>
 
-      
+
         <!-- function botton -->
         <Button 
             Text="Start Game"
