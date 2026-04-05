@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace FlyACat;
 
-public partial class GamePage : ContentPage
+public partial class Level2Page : ContentPage
 {
     private const int Rows = 12;
     private const int Cols = 12;
     private int _lives = 3;
-    private int _catsRemaining=5;
+    private int _catsRemaining = 9; // 第二关有9只猫
     private bool _isAnimating = false;
     private int[,] _gridMap;
     private List<CatSegment> _allCats = new();
@@ -27,7 +27,7 @@ public partial class GamePage : ContentPage
         public View ContainerRef { get; set; }
     }
 
-    public GamePage()
+    public Level2Page()
     {
         InitializeComponent();
         InitGame();
@@ -37,7 +37,7 @@ public partial class GamePage : ContentPage
     {
         _lives = 3;
         _isAnimating = false;
-        _catsRemaining = 5;
+        _catsRemaining = 9;
         _allCats.Clear();
         _gridMap = new int[Rows, Cols];
 
@@ -46,18 +46,22 @@ public partial class GamePage : ContentPage
         RemainingLabel.Text = _catsRemaining.ToString();
         UpdateStarsUI();
 
-        // 初始化网格
         GameGrid.ColumnDefinitions.Clear();
         GameGrid.RowDefinitions.Clear();
         for (int i = 0; i < Cols; i++) GameGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
         for (int i = 0; i < Rows; i++) GameGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
 
-        // 创建第一关的5只猫
-        CreateCat("Teal", (1, 1), (2, 1), (3, 1),(4,1),(5,1),(6,1)); // 向上飞
-        CreateCat("Pink", (9, 10), (8, 10), (7, 10)); // 向下飞
-        CreateCat("Blue", (1, 5), (1, 4), (1, 3)); // 向右飞
-        CreateCat("Yellow", (10, 5), (10, 6), (10, 7)); // 向左飞
-        CreateCat("Purple", (5, 5), (5, 6), (5, 7)); // 向左飞
+        // --- 修正后的猫咪坐标（第一个坐标是头，第二个是脖子） ---
+        // 确保第一个点和第二个点的距离只有 1 格
+        CreateCat("Pink", (2, 9), (2, 8), (2, 7));    // 右 -> 左 (头在9，脖在8)
+        CreateCat("Gray", (9, 1), (8, 1), (7, 1));    // 下 -> 上 (头在9，脖在8)
+        CreateCat("Blue", (4, 3), (4, 4), (4, 5));    // 左 -> 右 (头在3，脖在4)
+        CreateCat("Green", (5, 10), (6, 10), (7, 10)); // 上 -> 下
+        CreateCat("Orange", (10, 8), (10, 7), (10, 6));
+        CreateCat("Red", (3, 5), (4, 5), (5, 5));
+        CreateCat("Purple", (5, 3), (5, 4), (5, 5));
+        CreateCat("Teal", (7, 4), (6, 4), (5, 4));
+        CreateCat("Brown", (6, 7), (6, 6), (6, 5));
 
         RenderGrid();
     }
@@ -66,8 +70,7 @@ public partial class GamePage : ContentPage
     {
         for (int i = 0; i < body.Length; i++)
         {
-            var seg = new CatSegment
-            { Row = body[i].r, Col = body[i].c, IsHead = (i == 0), BodyIndex = i, ColorKey = color };
+            var seg = new CatSegment { Row = body[i].r, Col = body[i].c, IsHead = (i == 0), BodyIndex = i, ColorKey = color };
             _allCats.Add(seg);
             _gridMap[seg.Row, seg.Col] = 1;
         }
@@ -75,15 +78,13 @@ public partial class GamePage : ContentPage
 
     private void RenderGrid()
     {
-       
-              
         GameGrid.Children.Clear();
         foreach (var seg in _allCats.OrderBy(s => s.IsHead))
         {
             var container = new AbsoluteLayout();
             var btn = new Button
             {
-                Text = seg.IsHead ? GetCatIcon(seg) : "♦",
+                Text = seg.IsHead ? GetCatIcon(seg) : "●",
                 BackgroundColor = GetColor(seg.ColorKey),
                 TextColor = Colors.White,
                 Padding = 0,
@@ -104,10 +105,13 @@ public partial class GamePage : ContentPage
 
     private string GetCatIcon(CatSegment head)
     {
+        // 查找属于这只猫的 BodyIndex 为 1 的段（脖子）
         var neck = _allCats.FirstOrDefault(s => s.ColorKey == head.ColorKey && s.BodyIndex == 1);
         if (neck == null) return "😺";
-        int dr = head.Row - neck.Row;
-        int dc = head.Col - neck.Col;
+
+        int dr = head.Row - neck.Row; // 行差
+        int dc = head.Col - neck.Col; // 列差
+
         if (dr < 0) return "😺⬆️";
         if (dr > 0) return "😺⬇️";
         if (dc < 0) return "⬅️😺";
@@ -120,6 +124,7 @@ public partial class GamePage : ContentPage
         var head = _allCats.FirstOrDefault(s => s.ButtonRef == (Button)sender);
         var body = _allCats.Where(s => s.ColorKey == head.ColorKey).OrderBy(s => s.BodyIndex).ToList();
 
+        // 计算飞行方向
         int dr = Math.Sign(head.Row - body[1].Row);
         int dc = Math.Sign(head.Col - body[1].Col);
 
@@ -128,7 +133,6 @@ public partial class GamePage : ContentPage
             await HandleCrash(head);
             return;
         }
-
         await FlyAway(body, dr, dc);
     }
 
@@ -148,7 +152,7 @@ public partial class GamePage : ContentPage
     {
         _isAnimating = true;
         var tasks = body.Select(s => Task.WhenAll(
-            s.ContainerRef.TranslateTo(dc * 800, dr * 800, 400, Easing.CubicIn),
+            s.ContainerRef.TranslateTo(dc * 1000, dr * 1000, 400, Easing.CubicIn),
             s.ContainerRef.FadeTo(0, 400)
         ));
         await Task.WhenAll(tasks);
@@ -189,9 +193,8 @@ public partial class GamePage : ContentPage
     private void ShowGameOver(bool win)
     {
         GameOverFrame.IsVisible = true;
-        GameOverText.Text = win ? "🎉 SUCCESS!" : "💥 FAILED";
-        GameOverSubText.Text = win ? "You saved all cats!" : "Try to avoid collisions!";
-        NextLevelButton.IsVisible = win; // 成功才显示下一关
+        GameOverText.Text = win ? "🌟 CLEAR!" : "💥 FAILED";
+        NextLevelButton.IsVisible = win;
     }
 
     private Color GetColor(string key) => key switch
@@ -199,12 +202,16 @@ public partial class GamePage : ContentPage
         "Teal" => Colors.Teal,
         "Pink" => Colors.DeepPink,
         "Blue" => Colors.DodgerBlue,
-        "Yellow" => Colors.Orange,
-        "Purple" => Colors.MediumPurple,
+        "Orange" => Colors.Orange,
+        "Red" => Colors.Red,
+        "Green" => Colors.Green,
+        "Purple" => Colors.Purple,
+        "Gray" => Colors.Gray,
+        "Brown" => Colors.Brown,
         _ => Colors.Gray
     };
 
-    private async void OnNextLevelClicked(object sender, EventArgs e) => await Navigation.PushAsync(new Level2Page());
+    private async void OnNextLevelClicked(object sender, EventArgs e) => await Navigation.PushAsync(new Level3Page());
     private void OnRestartClicked(object sender, EventArgs e) => InitGame();
     private async void OnBackClicked(object sender, EventArgs e) => await Navigation.PopAsync();
 }

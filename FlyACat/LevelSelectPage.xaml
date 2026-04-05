@@ -4,61 +4,11 @@
              x:Class="FlyACat.LevelSelectPage"
              Title="Select Level">
 
-    <VerticalStackLayout 
-        Spacing="20" 
-        Padding="30"
-        VerticalOptions="Center"
-        HorizontalOptions="Center">
-
-        <!-- Tittle -->
-        <Label 
-            Text="Choose Your Level"
-            FontSize="28"
-            FontAttributes="Bold"
-            HorizontalOptions="Center" 
-            Margin="0,0,0,30"/>
-
-        <!-- level1 -->
-        <Button 
-            Text="Level 1"
-            Clicked="OnLevel1Clicked"
-            WidthRequest="250"
-            HeightRequest="60"
-            FontSize="18"
-            BackgroundColor="#4CAF50"
-            TextColor="White"
-            CornerRadius="10"/>
-
-        <!-- level2 -->
-        <Button 
-            Text="Level 2"
-            Clicked="OnLevel2Clicked"
-            WidthRequest="250"
-            HeightRequest="60"
-            FontSize="18"
-            BackgroundColor="#2196F3"
-            TextColor="White"
-            CornerRadius="10"/>
-
-        <!-- level 3 -->
-        <Button 
-            Text="Level 3"
-            Clicked="OnLevel3Clicked"
-            WidthRequest="250"
-            HeightRequest="60"
-            FontSize="18"
-            BackgroundColor="#9C27B0"
-            TextColor="White"
-            CornerRadius="10"/>
-
-        <!-- 返回按钮 -->
-        <Button 
-            Text="Back to Menu"
-            Clicked="OnBackClicked"
-            WidthRequest="250"
-            BackgroundColor="LightGray"
-            TextColor="Black"
-            Margin="0,20,0,0"/>
-
+    <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center" HorizontalOptions="Center">
+        <Label Text="Choose Your Level" TextColor="Blue" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+        <Button Text="Level 1" Clicked="OnLevel1Clicked" WidthRequest="250" HeightRequest="60" BackgroundColor="#4CAF50" CornerRadius="10"/>
+        <Button Text="Level 2" Clicked="OnLevel2Clicked" WidthRequest="250" HeightRequest="60" BackgroundColor="#2196F3" CornerRadius="10"/>
+        <Button Text="Level 3 " Clicked="OnLevel3Clicked" WidthRequest="250" HeightRequest="60" BackgroundColor="#FF9800" CornerRadius="10"/>
+        <Button Text="Back" Clicked="OnBackClicked" WidthRequest="250" Margin="0,20" BackgroundColor="Gray"/>
     </VerticalStackLayout>
 </ContentPage>

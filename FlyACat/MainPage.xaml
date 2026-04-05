@@ -2,83 +2,100 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FlyACat.MainPage"
-             Title="Fly A Cat">
+             Title="Fly A Cat - HomePage"
+             BackgroundColor="White">
 
-    <VerticalStackLayout 
-        Spacing="25" 
-        Padding="30"
-        VerticalOptions="Center"
-        HorizontalOptions="Center">
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center" HorizontalOptions="Center">
 
-        <!-- tittle-->
-        <Label 
-            Text="Fly A Cat"
-            FontSize="32"
-            FontAttributes="Bold"
-            HorizontalOptions="Center" />
+            <Label Text="Fly A Cat" 
+                   FontSize="36" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="#2196F3"
+                   Margin="0,0,0,10"/>
 
-        <!-- user card -->
-        <Frame BorderColor="LightGray" CornerRadius="15" Padding="15" HasShadow="True">
-            <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+            <Border Stroke="#DDDDDD"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 20"
+                    Padding="25" 
+                    BackgroundColor="White"
+                    MaximumWidthRequest="350">
+                <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
 
-                <!-- 头像  -->
-                <Image 
-                    x:Name="UserAvatar"
-                    Source="dotnet_bot.png" 
-                    WidthRequest="100" 
-                    HeightRequest="100"
-                    Aspect="AspectFill"
-                    HorizontalOptions="Center">
-                    <Image.Clip>
-                        <EllipseGeometry RadiusX="50" RadiusY="50" Center="50,50" />
-                    </Image.Clip>
-                </Image>
+                    <Grid WidthRequest="150" HeightRequest="150" HorizontalOptions="Center">
+                        <Image x:Name="UserAvatar" 
+                               Source="dotnet_bot.png" 
+                               Aspect="AspectFill">
+                            <Image.Clip>
+                                <EllipseGeometry RadiusX="75" RadiusY="75" Center="75,75" />
+                            </Image.Clip>
+                        </Image>
 
-                <!-- ID 输入框 -->
-                <Entry 
-                    x:Name="UserIdEntry"
-                    Placeholder="Enter your ID"
-                    Text="Player1"
-                    HorizontalOptions="Center"
-                    WidthRequest="200"
-                    TextChanged="OnIdChanged"/>
+                        <Border x:Name="CameraOverlay" 
+                                IsVisible="False" 
+                                BackgroundColor="Black" 
+                                StrokeShape="Ellipse"
+                                Stroke="Transparent">
+                            <Grid>
+                                <Image x:Name="PreviewImage" Source="dotnet_bot.png" Opacity="0.7" Aspect="AspectFill"/>
+                                <BoxView Color="White" Opacity="0.1" />
+                                <Label Text="[ CAMERA ON ]" 
+                                       TextColor="White" 
+                                       FontSize="11" 
+                                       HorizontalOptions="Center" 
+                                       VerticalOptions="Center" 
+                                       FontAttributes="Bold"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
 
-                <!-- Button group: Take photo & Select picture  -->
-                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Button 
-                        Text="📷 Photo"
-                        FontSize="12"
-                        Padding="10,5"
-                        BackgroundColor="#2196F3"
-                        TextColor="White"/>
-                
+                    <Entry x:Name="UserIdEntry" 
+                           Placeholder="Player ID" 
+                           Text="Player1" 
+                           HorizontalOptions="Center" 
+                           WidthRequest="180" 
+                           HorizontalTextAlignment="Center"
+                           TextChanged="OnIdChanged"/>
 
-                    <Button 
-                        Text="️ Gallery"
-                        FontSize="12"
-                        Padding="10,5"
-                        BackgroundColor="#4CAF50"
-                        TextColor="White"/>
-               
-                </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Button x:Name="BtnVirtualPhoto" 
+                                Text="📷 Photo" 
+                                Clicked="OnVirtualCameraClicked" 
+                                BackgroundColor="#2196F3" 
+                                CornerRadius="10"
+                                WidthRequest="100"/>
+
+                        <Button x:Name="BtnCapture" 
+                                Text="✔️ Take" 
+                                IsVisible="False" 
+                                Clicked="OnCaptureClicked" 
+                                BackgroundColor="#4CAF50" 
+                                CornerRadius="10"
+                                WidthRequest="100"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <VerticalStackLayout Spacing="15" Margin="0,10">
+                <Button Text="Start Game" 
+                        Clicked="OnStartGameClicked" 
+                        WidthRequest="240" 
+                        HeightRequest="60" 
+                        BackgroundColor="#4CAF50" 
+                        FontSize="20" 
+                        FontAttributes="Bold"  
+                        CornerRadius="30"/>
+
+                <Button Text="Select Level" 
+                        Clicked="OnSelectLevelClicked" 
+                        WidthRequest="240" 
+                        HeightRequest="60" 
+                        BackgroundColor="#FF9800" 
+                      
+                        CornerRadius="30"/>
             </VerticalStackLayout>
-        </Frame>
 
-
-        <!-- function botton -->
-        <Button 
-            Text="Start Game"
-            Clicked="OnStartGameClicked"
-            HorizontalOptions="Center"
-            WidthRequest="200" />
-
-        <Button 
-            Text="Select Level"
-            Clicked="OnSelectLevelClicked"
-            HorizontalOptions="Center"
-            WidthRequest="200"
-            BackgroundColor="LightGray"
-            TextColor="Black"/>
-
-    </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

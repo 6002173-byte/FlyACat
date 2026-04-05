@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FlyACat.Level3Page"
+             Title="Fly A Cat - Level 3">
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="10" BackgroundColor="#F3E5F5">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="8" HorizontalOptions="Center" Margin="0,10,0,20">
+            <Label Text="🏆 FINAL CHALLENGE" FontSize="26" FontAttributes="Bold" TextColor="#7B1FA2" HorizontalOptions="Center"/>
+
+            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center" Margin="0,5">
+                <Label x:Name="Star1" Text="❤️" FontSize="28"/>
+                <Label x:Name="Star2" Text="❤️" FontSize="28"/>
+                <Label x:Name="Star3" Text="❤️" FontSize="28"/>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                <Label Text="🎯 Target Cats：" FontSize="18" VerticalOptions="Center"/>
+                <Label x:Name="RemainingLabel" Text="12" FontSize="20" FontAttributes="Bold" TextColor="#D32F2F" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+
+        <Grid x:Name="GameGrid" Grid.Row="1" BackgroundColor="#FFFFFF" Margin="10" ColumnSpacing="1" RowSpacing="1"/>
+
+        <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="20" Margin="0,20">
+            <Button Text="🔄 Retry" Clicked="OnRestartClicked" BackgroundColor="#9C27B0" TextColor="White" WidthRequest="120"/>
+            <Button Text="🔙 Menu" Clicked="OnBackClicked" BackgroundColor="#9E9E9E" TextColor="White" WidthRequest="120"/>
+        </HorizontalStackLayout>
+
+        <Border x:Name="GameOverFrame" IsVisible="False" BackgroundColor="#CC000000" HorizontalOptions="Fill" VerticalOptions="Fill" StrokeThickness="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0"/>
+            </Border.StrokeShape>
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="25">
+                <Label x:Name="GameOverText" Text="" FontSize="36" TextColor="White" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                <Label x:Name="GameOverSubText" Text="" FontSize="18" TextColor="#DDD" HorizontalTextAlignment="Center"/>
+                <Button x:Name="RetryButton" Text="Play Again" Clicked="OnRestartClicked" WidthRequest="220" HeightRequest="50" BackgroundColor="#4CAF50" TextColor="White" CornerRadius="25"/>
+                <Button Text="Quit" Clicked="OnBackClicked" WidthRequest="220" HeightRequest="50" BackgroundColor="Transparent" BorderColor="White" BorderWidth="2" TextColor="White" CornerRadius="25"/>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>
