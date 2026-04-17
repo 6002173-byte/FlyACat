@@ -6,11 +6,11 @@ namespace FlyACat;
 
 public partial class MainPage : ContentPage
 {
-    // 定义存储的“钥匙”（Key），用于存取数据
+    // Define the keys for storing names and avatars
     private const string AvatarKey = "UserAvatarPath";
     private const string UserIdKey = "SavedUserId";
 
-    // 自定义头像图片列表
+    // List of profile pictures
     private string[] _fakeGalleries = {
         "dotnet_bot.png",
         "avatar_cat_cool.png",
@@ -24,34 +24,31 @@ public partial class MainPage : ContentPage
     {
         InitializeComponent();
 
-        // ⭐ 核心功能：程序启动时加载上次保存的数据
+        
         LoadUserData();
     }
 
-    /// <summary>
-    /// 从本地存储加载头像和 ID
-    /// </summary>
+    // Load the avatar and ID from local storage
     private void LoadUserData()
     {
-        // 1. 读取保存的 ID，如果没有存过，默认显示 "Player1"
+        // Read the saved ID. If no ID has been saved, display "Player1" by default.
         string savedId = Preferences.Default.Get(UserIdKey, "Player1");
         UserIdEntry.Text = savedId;
 
-        // 2. 读取保存的头像路径，如果没有存过，默认显示 "dotnet_bot.png"
+        // Read the saved avatar path. If no avatar has been saved before, display "dotnet_bot.png" by default.
         string savedAvatar = Preferences.Default.Get(AvatarKey, "dotnet_bot.png");
         UserAvatar.Source = savedAvatar;
 
-        // 同步当前的索引，防止点击 Next 时跳回第一张
-        _currentIndex = Array.IndexOf(_fakeGalleries, savedAvatar);
+        // Synchronize the current index to prevent jumping back to the first image when clicking "Next"
+        _currentIndex = Array.IndexOf(_fakeGalleries, savedAvatar);// If no image is found, return -1 as the default avatar.
         if (_currentIndex < 0) _currentIndex = 0;
     }
 
-    /// <summary>
-    /// 当用户修改 ID 输入框时，实时保存
-    /// </summary>
+
+    // When the user modifies the input field for ID, the information is saved in real time.
     private void OnIdChanged(object sender, TextChangedEventArgs e)
     {
-        // ⭐ 实时保存 ID 到本地
+        // Save the ID in real time to the local storage
         Preferences.Default.Set(UserIdKey, e.NewTextValue);
     }
 
@@ -78,16 +75,16 @@ public partial class MainPage : ContentPage
 
     private async void OnCaptureClicked(object sender, EventArgs e)
     {
-        // 模拟快门
+        // Simulation Shutter
         await CameraOverlay.FadeTo(0.2, 100);
         await CameraOverlay.FadeTo(1.0, 100);
 
         string selectedAvatar = _fakeGalleries[_currentIndex];
 
-        // 1. 更新 UI 显示
+        // Update UI display
         UserAvatar.Source = selectedAvatar;
 
-        // ⭐ 2. 核心功能：将选择的头像文件名保存到本地
+        // Save the selected avatar file name to the local storage
         Preferences.Default.Set(AvatarKey, selectedAvatar);
 
         await DisplayAlert("Saved", "Profile updated and saved!", "OK");
@@ -98,7 +95,7 @@ public partial class MainPage : ContentPage
        
     }
 
-    // --- 页面跳转逻辑 ---
+    // Page transition logic
     private async void OnStartGameClicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new GamePage());

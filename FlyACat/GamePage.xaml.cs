@@ -1,8 +1,12 @@
+
 using Microsoft.Maui.Controls;
+using Plugin.LocalNotification;
+using Plugin.LocalNotification.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 
 namespace FlyACat;
 
@@ -46,18 +50,18 @@ public partial class GamePage : ContentPage
         RemainingLabel.Text = _catsRemaining.ToString();
         UpdateStarsUI();
 
-        // 初始化网格
+        // Initialize the grid
         GameGrid.ColumnDefinitions.Clear();
         GameGrid.RowDefinitions.Clear();
         for (int i = 0; i < Cols; i++) GameGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
         for (int i = 0; i < Rows; i++) GameGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
 
-        // 创建第一关的5只猫
-        CreateCat("Teal", (1, 1), (2, 1), (3, 1),(4,1),(5,1),(6,1)); // 向上飞
-        CreateCat("Pink", (9, 10), (8, 10), (7, 10)); // 向下飞
-        CreateCat("Blue", (1, 5), (1, 4), (1, 3)); // 向右飞
-        CreateCat("Yellow", (10, 5), (10, 6), (10, 7)); // 向左飞
-        CreateCat("Purple", (5, 5), (5, 6), (5, 7)); // 向左飞
+        // Create the 5 cats for the first level
+        CreateCat("Teal", (1, 1), (2, 1), (3, 1),(4,1),(5,1),(6,1)); 
+        CreateCat("Pink", (9, 10), (8, 10), (7, 10)); 
+        CreateCat("Blue", (1, 5), (1, 4), (1, 3)); 
+        CreateCat("Yellow", (10, 5), (10, 6), (10, 7)); 
+        CreateCat("Purple", (5, 5), (5, 6), (5, 7)); 
 
         RenderGrid();
     }
@@ -166,13 +170,13 @@ public partial class GamePage : ContentPage
         _isAnimating = false;
     }
 
-    private async Task HandleCrash(CatSegment head)
+    private async Task HandleCrash(CatSegment head)//Collision effect
     {
         _isAnimating = true;
-        head.ButtonRef.Text = "💥";
-        for (int i = 0; i < 2; i++) { await head.ButtonRef.TranslateTo(8, 0, 50); await head.ButtonRef.TranslateTo(-8, 0, 50); }
-        await head.ButtonRef.TranslateTo(0, 0, 50);
-        head.ButtonRef.Text = GetCatIcon(head);
+        head.ButtonRef.Text = "💥";// Change the cat's head into an explosion
+        for (int i = 0; i < 2; i++) { await head.ButtonRef.TranslateTo(8, 0, 50); await head.ButtonRef.TranslateTo(-8, 0, 50); }// Move left and right twice to imitate the vibration.
+        await head.ButtonRef.TranslateTo(0, 0, 50);//resume seat
+        head.ButtonRef.Text = GetCatIcon(head);//Restore the cat's head
         _lives--;
         UpdateStarsUI();
         if (_lives <= 0) ShowGameOver(false);
@@ -188,10 +192,39 @@ public partial class GamePage : ContentPage
 
     private void ShowGameOver(bool win)
     {
-        GameOverFrame.IsVisible = true;
-        GameOverText.Text = win ? "🎉 SUCCESS!" : "💥 FAILED";
-        GameOverSubText.Text = win ? "You saved all cats!" : "Try to avoid collisions!";
-        NextLevelButton.IsVisible = win; // 成功才显示下一关
+        GameOverFrame.IsVisible =
+    true
+    ;
+        GameOverText.Text = win ?
+    "🎉 SUCCESS!" : "💥 FAILED"
+    ;
+        GameOverSubText.Text = win ?
+    "You saved all cats!" : "Try to avoid collisions!"
+    ;
+        NextLevelButton.IsVisible = win;
+
+        // Trigger notification upon completing the first level
+        if
+     (win)
+        {
+            SendDelayedNotification();
+        }
+    }
+    private void SendDelayedNotification()
+    {
+        var request = new NotificationRequest
+        {
+            NotificationId = 1000, // The first level uses 1000.
+            Title = "FLYACAT - LEVEL1",
+            Description = "The cat in the first level has taken off safely! Come back and challenge the more difficult levels!！",
+            Schedule = new NotificationRequestSchedule
+            {
+                // Push will be triggered after 10 seconds.
+                NotifyTime = DateTime.Now.AddSeconds(10)
+            }
+        };
+
+        LocalNotificationCenter.Current.Show(request);
     }
 
     private Color GetColor(string key) => key switch

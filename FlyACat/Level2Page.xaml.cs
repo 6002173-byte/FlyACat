@@ -1,4 +1,6 @@
 using Microsoft.Maui.Controls;
+using Plugin.LocalNotification;
+using Plugin.LocalNotification.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,7 @@ public partial class Level2Page : ContentPage
     private const int Rows = 12;
     private const int Cols = 12;
     private int _lives = 3;
-    private int _catsRemaining = 9; // 第二关有9只猫
+    private int _catsRemaining = 9; // In the second level, there are 9 cats.
     private bool _isAnimating = false;
     private int[,] _gridMap;
     private List<CatSegment> _allCats = new();
@@ -51,12 +53,12 @@ public partial class Level2Page : ContentPage
         for (int i = 0; i < Cols; i++) GameGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
         for (int i = 0; i < Rows; i++) GameGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
 
-        // --- 修正后的猫咪坐标（第一个坐标是头，第二个是脖子） ---
-        // 确保第一个点和第二个点的距离只有 1 格
-        CreateCat("Pink", (2, 9), (2, 8), (2, 7));    // 右 -> 左 (头在9，脖在8)
-        CreateCat("Gray", (9, 1), (8, 1), (7, 1));    // 下 -> 上 (头在9，脖在8)
-        CreateCat("Blue", (4, 3), (4, 4), (4, 5));    // 左 -> 右 (头在3，脖在4)
-        CreateCat("Green", (5, 10), (6, 10), (7, 10)); // 上 -> 下
+
+        // Ensure that the distance between the first point and the second point is exactly one unit.
+        CreateCat("Pink", (2, 9), (2, 8), (2, 7));    
+        CreateCat("Gray", (9, 1), (8, 1), (7, 1));    
+        CreateCat("Blue", (4, 3), (4, 4), (4, 5));    
+        CreateCat("Green", (5, 10), (6, 10), (7, 10)); 
         CreateCat("Orange", (10, 8), (10, 7), (10, 6));
         CreateCat("Red", (3, 5), (4, 5), (5, 5));
         CreateCat("Purple", (5, 3), (5, 4), (5, 5));
@@ -76,7 +78,7 @@ public partial class Level2Page : ContentPage
         }
     }
 
-    private void RenderGrid()
+    private void RenderGrid()// Rendering of the grid
     {
         GameGrid.Children.Clear();
         foreach (var seg in _allCats.OrderBy(s => s.IsHead))
@@ -90,45 +92,48 @@ public partial class Level2Page : ContentPage
                 Padding = 0,
                 FontSize = 14,
                 CornerRadius = 8,
+                // Determine which of the two controls should be displayed on top when they overlap on the screen
                 ZIndex = seg.IsHead ? 10 : 0
             };
-
+            
             if (seg.IsHead) btn.Clicked += OnCatHeadClicked;
             else btn.IsEnabled = false;
-
+            // If it is a snake head, then bind the click event of the button
             container.Children.Add(btn);
+            // Place the button body into the grid
             GameGrid.Add(container, seg.Col, seg.Row);
-            seg.ButtonRef = btn;
+            seg.ButtonRef = btn;// Set the "btn" attribute for each "seg" in the following sequence
             seg.ContainerRef = container;
         }
     }
 
-    private string GetCatIcon(CatSegment head)
+    private string GetCatIcon(CatSegment head)// Assign value to the avatar image
     {
-        // 查找属于这只猫的 BodyIndex 为 1 的段（脖子）
+        // Search for the segment (neck) with BodyIndex 1 that belongs to this cat
         var neck = _allCats.FirstOrDefault(s => s.ColorKey == head.ColorKey && s.BodyIndex == 1);
         if (neck == null) return "😺";
 
-        int dr = head.Row - neck.Row; // 行差
-        int dc = head.Col - neck.Col; // 列差
-
+        int dr = head.Row - neck.Row; 
+        int dc = head.Col - neck.Col;
+        // If the head minus the neck is greater than 0, it means flying upwards.
+        // If the head is smaller than the neck, it means on the left.
         if (dr < 0) return "😺⬆️";
         if (dr > 0) return "😺⬇️";
         if (dc < 0) return "⬅️😺";
         return "😺➡️";
     }
 
-    private async void OnCatHeadClicked(object sender, EventArgs e)
+    private async void OnCatHeadClicked(object sender, EventArgs e)// The actions performed after clicking on the cat's head
     {
-        if (_isAnimating || _lives <= 0) return;
-        var head = _allCats.FirstOrDefault(s => s.ButtonRef == (Button)sender);
-        var body = _allCats.Where(s => s.ColorKey == head.ColorKey).OrderBy(s => s.BodyIndex).ToList();
+        if (_isAnimating || _lives <= 0) return;// If it is in animation or there is no heart, then stop.
+        var head = _allCats.FirstOrDefault(s => s.ButtonRef == (Button)sender);// Find the first cat that clicks the button. If no cat is found, default to assigning the button to the cat.
+        var body = _allCats.Where(s => s.ColorKey == head.ColorKey).OrderBy(s => s.BodyIndex).ToList();// Search for bodies of the same color inside the cat's head and arrange them in a row
 
-        // 计算飞行方向
-        int dr = Math.Sign(head.Row - body[1].Row);
+        // Calculate the flight direction
+        int dr = Math.Sign(head.Row - body[1].Row);// Only retain positive and negative values
         int dc = Math.Sign(head.Col - body[1].Col);
 
-        if (!IsPathClear(head, dr, dc, body))
+        if (!IsPathClear(head, dr, dc, body))// If it doesn't work, it will explode.
         {
             await HandleCrash(head);
             return;
@@ -136,28 +141,28 @@ public partial class Level2Page : ContentPage
         await FlyAway(body, dr, dc);
     }
 
-    private bool IsPathClear(CatSegment head, int dr, int dc, List<CatSegment> body)
+    private bool IsPathClear(CatSegment head, int dr, int dc, List<CatSegment> body)// Check if the path is valid
     {
-        int r = head.Row + dr;
+        int r = head.Row + dr;//Start the detection from the second grid behind the direction facing the cat's head.
         int c = head.Col + dc;
-        while (r >= 0 && r < Rows && c >= 0 && c < Cols)
+        while (r >= 0 && r < Rows && c >= 0 && c < Cols)// When it does not exceed the boundaries of the game grid
         {
-            if (!body.Any(b => b.Row == r && b.Col == c) && _gridMap[r, c] == 1) return false;
-            r += dr; c += dc;
+            if (!body.Any(b => b.Row == r && b.Col == c) && _gridMap[r, c] == 1) return false;// If the body grid of the cat does not have a value of 1 that is occupied, an error will be reported here.
+            r += dr; c += dc;//Continue the detection in the direction of the cat's head
         }
         return true;
     }
 
     private async Task FlyAway(List<CatSegment> body, int dr, int dc)
     {
-        _isAnimating = true;
+        _isAnimating = true;// Prevent animation from stopping upon click
         var tasks = body.Select(s => Task.WhenAll(
-            s.ContainerRef.TranslateTo(dc * 1000, dr * 1000, 400, Easing.CubicIn),
-            s.ContainerRef.FadeTo(0, 400)
+            s.ContainerRef.TranslateTo(dc * 1000, dr * 1000, 400, Easing.CubicIn),// Move 1000 pixels out of the screen within 0.4 seconds. From slow to fast.
+            s.ContainerRef.FadeTo(0, 400)// Become transparent
         ));
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(tasks);// Wait until completion and then proceed.
 
-        foreach (var s in body)
+        foreach (var s in body)// Remove object
         {
             _gridMap[s.Row, s.Col] = 0;
             _allCats.Remove(s);
@@ -166,17 +171,17 @@ public partial class Level2Page : ContentPage
 
         _catsRemaining--;
         RemainingLabel.Text = _catsRemaining.ToString();
-        if (_catsRemaining <= 0) ShowGameOver(true);
+        if (_catsRemaining <= 0) ShowGameOver(true);// If all the cats have cleared, display the end screen.
         _isAnimating = false;
     }
 
-    private async Task HandleCrash(CatSegment head)
+    private async Task HandleCrash(CatSegment head)// Collision Effect
     {
         _isAnimating = true;
-        head.ButtonRef.Text = "💥";
-        for (int i = 0; i < 2; i++) { await head.ButtonRef.TranslateTo(8, 0, 50); await head.ButtonRef.TranslateTo(-8, 0, 50); }
-        await head.ButtonRef.TranslateTo(0, 0, 50);
-        head.ButtonRef.Text = GetCatIcon(head);
+        head.ButtonRef.Text = "💥";// Change the cat's head into an explosion
+        for (int i = 0; i < 2; i++) { await head.ButtonRef.TranslateTo(8, 0, 50); await head.ButtonRef.TranslateTo(-8, 0, 50); } //Move left and right twice to simulate the vibration.
+        await head.ButtonRef.TranslateTo(0, 0, 50);// Return to original position
+        head.ButtonRef.Text = GetCatIcon(head);//Restore the cat's head
         _lives--;
         UpdateStarsUI();
         if (_lives <= 0) ShowGameOver(false);
@@ -192,9 +197,42 @@ public partial class Level2Page : ContentPage
 
     private void ShowGameOver(bool win)
     {
-        GameOverFrame.IsVisible = true;
-        GameOverText.Text = win ? "🌟 CLEAR!" : "💥 FAILED";
+        GameOverFrame.IsVisible =
+    true
+    ;
+        GameOverText.Text = win ?
+    "🌟 CLEAR!" : "💥 FAILED"
+    ;
         NextLevelButton.IsVisible = win;
+
+        if
+     (win)
+        {
+            // Push notification for completing the second level
+            SendDelayedNotification(
+    "Challenge of the second level successfully completed!", "You're truly a cat-saving expert! The ultimate challenge is waiting for you!"
+    );
+        }
+    }
+    private void SendDelayedNotification(string title, string description)
+    {
+        var request = new
+     NotificationRequest
+        {
+            NotificationId =
+    2000, 
+            Title = title,
+            Description = description,
+            Schedule =
+    new
+     NotificationRequestSchedule
+    {
+        NotifyTime = DateTime.Now.AddSeconds(
+    10
+    )
+    }
+        };
+        LocalNotificationCenter.Current.Show(request);
     }
 
     private Color GetColor(string key) => key switch
